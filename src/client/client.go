@@ -2,12 +2,17 @@ package client
 
 import (
 	"../config"
+	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/segmentio/ksuid"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -70,12 +75,46 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 
 	path, err := os.Getwd()
 	separator := string(os.PathSeparator)
-	addedPath := strings.ReplaceAll(strings.ReplaceAll(projectConfig.InstallPaths["default"],"./",""),"/",separator)
-	_ = os.Mkdir(path+separator+addedPath, 0700)
-	out, err := os.Create(path+separator+addedPath+downloadableRelease.Release.FileName)
+	var addedPath = ""
+	if val, ok := projectConfig.InstallPaths[downloadableRelease.Release.FileExtension]; ok {
+		addedPath = strings.ReplaceAll(strings.ReplaceAll(val,"./",""),"/",separator)
+	} else {
+		addedPath = strings.ReplaceAll(strings.ReplaceAll(projectConfig.InstallPaths["default"],"./",""),"/",separator)
+	}
+	finalPath := path+separator+addedPath
+	_ = os.Mkdir(finalPath, 0700)
+	out, err := os.Create(finalPath+downloadableRelease.Release.FileName)
 	defer out.Close()
-
 	_, err = io.Copy(out, resp.Body)
+
+	// TODO place remove/rename on a different folder
+	// unzip
+	if downloadableRelease.Release.FileExtension=="zip" {
+		tempFolder := finalPath+ksuid.New().String()+separator
+		_ = os.Mkdir(tempFolder, 0700)
+		_, err := unzip(finalPath+downloadableRelease.Release.FileName,tempFolder)
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
+		err = filepath.Walk(tempFolder,
+			func(path string, info os.FileInfo, err error) error {
+				if strings.HasSuffix(path,".jar") && !info.IsDir() {
+					excluded := false
+					for _, excludeSchema := range projectConfig.ExcludeFiles {
+						res, _ := regexp.MatchString(excludeSchema, info.Name())
+						if strings.TrimSuffix(info.Name(),".jar")==excludeSchema||res {
+							excluded = true
+						}
+					}
+					if !excluded {
+						err =  os.Rename(path, finalPath+info.Name())
+					}
+				}
+				return nil
+			})
+		err = os.Rename(finalPath+downloadableRelease.Release.FileName, finalPath+downloadableRelease.Release.FileName)
+		err = os.RemoveAll(tempFolder)
+	}
 
 	return downloadableRelease, err
 }
@@ -101,4 +140,45 @@ func request(path string, data map[string]string) (io.Reader,error) {
 		result = bytes.NewReader(body)
 	}
 	return result, err
+}
+
+func unzip(src string, dest string) ([]string, error) {
+
+	var filenames []string
+
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return filenames, err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		fpath := filepath.Join(dest, f.Name)
+		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return filenames, fmt.Errorf("%s: illegal file path", fpath)
+		}
+		filenames = append(filenames, fpath)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return filenames, err
+		}
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return filenames, err
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return filenames, err
+		}
+		_, err = io.Copy(outFile, rc)
+		outFile.Close()
+		rc.Close()
+		if err != nil {
+			return filenames, err
+		}
+	}
+	return filenames, nil
 }
