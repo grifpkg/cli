@@ -3,10 +3,13 @@ package main
 import (
 	"./client"
 	"./config"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
+	"strconv"
 )
 
 var rootCMD = &cobra.Command{
@@ -56,7 +59,15 @@ var installCMD = &cobra.Command{
 				return
 			}
 			fmt.Fprintf(color.Output, "%s Downloaded resource %s version %s\n", color.HiGreenString("i"), color.CyanString(resources[0].Name), color.CyanString(release.Release.Version))
-			project.Dependencies[args[0]]="^"+release.Release.Version
+			dependencyTag := "@"+resources[0].Author.Username+"/"+dependency.Resource
+
+			versionHash := md5.New()
+			versionHash.Write([]byte(release.Release.Id+release.Release.Version))
+
+			resourceHash := md5.New()
+			resourceHash.Write([]byte(dependencyTag+dependency.Resource))
+
+			project.Dependencies[dependencyTag]=config.DependencyIdentifier{Version: "^"+release.Release.Version, Resource: resources[0].Id, Release: release.Release.Id, Hash: []string{hex.EncodeToString(resourceHash.Sum(nil)),hex.EncodeToString(versionHash.Sum(nil))}}
 			config.SaveConfig(project)
 			return
 		} else {
@@ -70,6 +81,7 @@ var initCMD = &cobra.Command{
 	Use:   "init",
 	Short: "Initializes the grif config file",
 	Long: "Creates a basic grif config file in order to start managing plugins",
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		_, err := config.Load()
 		if err != nil {
@@ -79,9 +91,44 @@ var initCMD = &cobra.Command{
 	},
 }
 
+var excludeCMD = &cobra.Command{
+	Use:   "exclude",
+	Aliases: []string{"e"},
+	Short: "Adds to the file-exclude list file names or regex",
+	Long: "Use as many arguments as you want forming regex expressions or file names to add to the file-exclude list to skip certain files during installs or updates",
+	Args: cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		project, err := config.Load()
+		if err != nil {
+			fmt.Fprintf(color.Output, "%s  while initializing: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+			return
+		}
+		var added int = 0
+		for _, arg := range args {
+			found:=false
+			for _, b := range project.ExcludeFiles {
+				if b == arg {
+					found=true
+					break
+				}
+			}
+			if !found {
+				added++
+				project.ExcludeFiles = append(project.ExcludeFiles, arg)
+			}
+		}
+		err = config.SaveConfig(project)
+		if err != nil {
+			fmt.Fprintf(color.Output, "%s  while updating the project file: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+			return
+		}
+		fmt.Fprintf(color.Output, "%s added %s names/regex to the file-exclude list\n", color.HiGreenString("i"), color.CyanString(strconv.Itoa(added)))
+	},
+}
+
 func main(){
 	if err := rootCMD.Execute(); err != nil {
-		fmt.Fprintf(color.Output, "%s  while initializing grif: %s\n", color.HiYellowString("!"), color.RedString("please, provide at least a resource name"))
+		fmt.Fprintf(color.Output, "%s  while initializing grif: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
 		os.Exit(1)
 	}
 }
@@ -89,4 +136,5 @@ func main(){
 func init() {
 	rootCMD.AddCommand(initCMD)
 	rootCMD.AddCommand(installCMD)
+	rootCMD.AddCommand(excludeCMD)
 }
