@@ -1,16 +1,17 @@
 package client
 
 import (
-	"./obj"
+	"../config"
 	"bytes"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
-func GetResources(name string, author string, service int) ([]obj.Resource, error) {
+func GetResources(name string, author string, service int) ([]Resource, error) {
 	var err error = nil
 	var data map[string]string = make(map[string]string)
 	data["name"]=name
@@ -21,12 +22,12 @@ func GetResources(name string, author string, service int) ([]obj.Resource, erro
 		data["service"]= string(rune(service))
 	}
 	request, err := request("resource/query/", data)
-	resourceList := make([]obj.Resource,0)
+	resourceList := make([]Resource,0)
 	err = json.NewDecoder(request).Decode(&resourceList)
 	return resourceList, err
 }
 
-func getRelease(resource obj.Resource, version string) (obj.Release, error) {
+func getRelease(resource Resource, version string) (Release, error) {
 	var err error = nil
 	var data map[string]string = make(map[string]string)
 	data["resource"] = resource.Id
@@ -34,23 +35,23 @@ func getRelease(resource obj.Resource, version string) (obj.Release, error) {
 		data["version"] = version
 	}
 	request, err := request("resource/release/get/", data)
-	release := obj.Release{}
+	release := Release{}
 	err = json.NewDecoder(request).Decode(&release)
 	return release, err
 }
 
-func GetReleases(resource obj.Resource) ([]obj.Release, error) {
+func GetReleases(resource Resource) ([]Release, error) {
 	var err error = nil
 	request, err := request("resource/release/list/", map[string]string{
 		"resource":resource.Id,
 	})
 
-	releaseList := make([]obj.Release,0)
+	releaseList := make([]Release,0)
 	err = json.NewDecoder(request).Decode(&releaseList)
 	return releaseList, err
 }
 
-func DownloadResource(resource obj.Resource, version string) (obj.DownloadableRelease, error) {
+func DownloadResource(resource Resource, version string, projectConfig config.Project) (DownloadableRelease, error) {
 	var err error = nil
 
 	// gets release
@@ -60,7 +61,7 @@ func DownloadResource(resource obj.Resource, version string) (obj.DownloadableRe
 	request, err := request("resource/release/download/", map[string]string{
 		"release": release.Id,
 	})
-	downloadableRelease := obj.DownloadableRelease{}
+	downloadableRelease := DownloadableRelease{}
 	err = json.NewDecoder(request).Decode(&downloadableRelease)
 
 	// download
@@ -69,10 +70,13 @@ func DownloadResource(resource obj.Resource, version string) (obj.DownloadableRe
 
 	path, err := os.Getwd()
 	separator := string(os.PathSeparator)
-	out, err := os.Create(path+separator+downloadableRelease.Release.FileName)
+	addedPath := strings.ReplaceAll(strings.ReplaceAll(projectConfig.InstallPaths["default"],"./",""),"/",separator)
+	_ = os.Mkdir(path+separator+addedPath, 0700)
+	out, err := os.Create(path+separator+addedPath+downloadableRelease.Release.FileName)
 	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
+
 	return downloadableRelease, err
 }
 
