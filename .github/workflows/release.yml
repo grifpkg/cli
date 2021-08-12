@@ -19,7 +19,9 @@ jobs:
           go-version: '^1.16.7'
       - name: "post-setup go"
         run: |
+          ls
           go version
+          go mod init
       - name: "build"
         run: |
           make all
