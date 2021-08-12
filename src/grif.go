@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./client"
-	"./config"
+	"github.com/grifpkg/cli/client"
+	"github.com/grifpkg/cli/config"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"

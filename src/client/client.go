@@ -1,11 +1,11 @@
 package client
 
 import (
-	"../config"
 	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/grifpkg/cli/config"
 	"github.com/segmentio/ksuid"
 	"io"
 	"io/ioutil"

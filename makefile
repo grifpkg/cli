@@ -22,8 +22,7 @@
 			$(GOCLEAN)
 			rm -r ./target/
     deps:
-			$(GOGET) "github.com/fatih/color"
 			$(GOGET) "github.com/spf13/cobra"
-			$(GOGET) "gopkg.in/AlecAivazis/survey.v1"
+			$(GOGET) "github.com/AlecAivazis/survey/v2"
 			${GOGET} "github.com/segmentio/ksuid"
 			${GOGET} "github.com/inconshreveable/mousetrap"
