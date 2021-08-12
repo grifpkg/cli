@@ -6,7 +6,7 @@
     BINARY_NAME=grif
     BINARY_UNIX=$(BINARY_NAME)_unix
     
-    all: deps clean build
+    all: deps build
     build: 
 			env GOOS="windows" GOARCH="amd64" $(GOBUILD) -o "./target/windows.x64.$(BINARY_NAME).exe" -v ./src/
 			env GOOS="windows" GOARCH="386" $(GOBUILD) -o "./target/windows.x32.$(BINARY_NAME).exe" -v ./src/
