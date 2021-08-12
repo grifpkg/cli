@@ -24,6 +24,6 @@
     deps:
 			$(GOGET) "github.com/fatih/color"
 			$(GOGET) "github.com/spf13/cobra"
-			$(GOGET) "github.com/AlecAivazis/survey"
+			$(GOGET) "github.com/alecaivazis/survey"
 			${GOGET} "github.com/segmentio/ksuid"
 			${GOGET} "github.com/inconshreveable/mousetrap"
