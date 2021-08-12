@@ -8,16 +8,16 @@
     
     all: deps clean build
     build: 
-			ENV GOOS="windows" GOARCH="amd64" $(GOBUILD) -o "./target/windows.x64.$(BINARY_NAME).exe" -v ./src/
-			ENV GOOS="windows" GOARCH="386" $(GOBUILD) -o "./target/windows.x32.$(BINARY_NAME).exe" -v ./src/
-			ENV GOOS="linux" GOARCH="amd64" $(GOBUILD) -o "./target/linux.x64.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="linux" GOARCH="arm64" $(GOBUILD) -o "./target/linux.x64.arm.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="linux" GOARCH="386" $(GOBUILD) -o "./target/linux.x32.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="openbsd" GOARCH="amd64" $(GOBUILD) -o "./target/openbsd.x64.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="openbsd" GOARCH="arm64" $(GOBUILD) -o "./target/openbsd.x64.arm.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="openbsd" GOARCH="386" $(GOBUILD) -o "./target/openbsd.x32.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="darwin" GOARCH="amd64" $(GOBUILD) -o "./target/macos.x64.$(BINARY_NAME)" -v ./src/
-			ENV GOOS="darwin" GOARCH="arm64" $(GOBUILD) -o "./target/macos.x64.arm.$(BINARY_NAME)" -v ./src/
+			env GOOS="windows" GOARCH="amd64" $(GOBUILD) -o "./target/windows.x64.$(BINARY_NAME).exe" -v ./src/
+			env GOOS="windows" GOARCH="386" $(GOBUILD) -o "./target/windows.x32.$(BINARY_NAME).exe" -v ./src/
+			env GOOS="linux" GOARCH="amd64" $(GOBUILD) -o "./target/linux.x64.$(BINARY_NAME)" -v ./src/
+			env GOOS="linux" GOARCH="arm64" $(GOBUILD) -o "./target/linux.x64.arm.$(BINARY_NAME)" -v ./src/
+			env GOOS="linux" GOARCH="386" $(GOBUILD) -o "./target/linux.x32.$(BINARY_NAME)" -v ./src/
+			env GOOS="openbsd" GOARCH="amd64" $(GOBUILD) -o "./target/openbsd.x64.$(BINARY_NAME)" -v ./src/
+			env GOOS="openbsd" GOARCH="arm64" $(GOBUILD) -o "./target/openbsd.x64.arm.$(BINARY_NAME)" -v ./src/
+			env GOOS="openbsd" GOARCH="386" $(GOBUILD) -o "./target/openbsd.x32.$(BINARY_NAME)" -v ./src/
+			env GOOS="darwin" GOARCH="amd64" $(GOBUILD) -o "./target/macos.x64.$(BINARY_NAME)" -v ./src/
+			env GOOS="darwin" GOARCH="arm64" $(GOBUILD) -o "./target/macos.x64.arm.$(BINARY_NAME)" -v ./src/
     clean: 
 			$(GOCLEAN)
 			rm -r ./target/
