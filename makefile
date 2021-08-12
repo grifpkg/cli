@@ -8,7 +8,7 @@
     
     all: deps build
     build:
-			cd ./src/
+			cd ./src/src/
 			ls
 			go mod tidy
 			env GOOS="windows" GOARCH="amd64" $(GOBUILD) -tags netgo -a -o "./target/windows.x64.$(BINARY_NAME).exe" -v .
