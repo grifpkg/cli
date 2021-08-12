@@ -21,7 +21,6 @@ jobs:
         run: |
           go version
           go clean -modcache
-          go init
       - name: "build"
         run: |
           make all
