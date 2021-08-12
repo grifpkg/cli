@@ -81,7 +81,6 @@ var initCMD = &cobra.Command{
 	Use:   "init",
 	Short: "Initializes the grif config file",
 	Long: "Creates a basic grif config file in order to start managing plugins",
-	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		_, err := config.Load()
 		if err != nil {

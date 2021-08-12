@@ -70,6 +70,20 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 	err = json.NewDecoder(request).Decode(&downloadableRelease)
 
 	// download
+	finalPath, separator, basepath, err := downloadFile(downloadableRelease,projectConfig)
+	if err != nil {
+		return DownloadableRelease{}, err
+	}
+
+	// unzip
+	if downloadableRelease.Release.FileExtension=="zip" {
+		handleZip(finalPath, separator, basepath,downloadableRelease,projectConfig)
+	}
+
+	return downloadableRelease, err
+}
+
+func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.Project) (string, string, string, error){
 	resp, err := http.Get(downloadableRelease.Url)
 	defer resp.Body.Close()
 
@@ -86,37 +100,7 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 	out, err := os.Create(finalPath+downloadableRelease.Release.FileName)
 	defer out.Close()
 	_, err = io.Copy(out, resp.Body)
-
-	// TODO place remove/rename on a different folder
-	// unzip
-	if downloadableRelease.Release.FileExtension=="zip" {
-		tempFolder := finalPath+ksuid.New().String()+separator
-		_ = os.Mkdir(tempFolder, 0700)
-		_, err := unzip(finalPath+downloadableRelease.Release.FileName,tempFolder)
-		if err != nil {
-			return DownloadableRelease{}, err
-		}
-		err = filepath.Walk(tempFolder,
-			func(path string, info os.FileInfo, err error) error {
-				if strings.HasSuffix(path,".jar") && !info.IsDir() {
-					excluded := false
-					for _, excludeSchema := range projectConfig.ExcludeFiles {
-						res, _ := regexp.MatchString(excludeSchema, info.Name())
-						if strings.TrimSuffix(info.Name(),".jar")==excludeSchema||res {
-							excluded = true
-						}
-					}
-					if !excluded {
-						err =  os.Rename(path, finalPath+info.Name())
-					}
-				}
-				return nil
-			})
-		err = os.Rename(finalPath+downloadableRelease.Release.FileName, finalPath+downloadableRelease.Release.FileName)
-		err = os.RemoveAll(tempFolder)
-	}
-
-	return downloadableRelease, err
+	return finalPath, separator, path+separator, err
 }
 
 func request(path string, data map[string]string) (io.Reader,error) {
@@ -140,6 +124,41 @@ func request(path string, data map[string]string) (io.Reader,error) {
 		result = bytes.NewReader(body)
 	}
 	return result, err
+}
+
+func handleZip(finalPath string, separator string, basePath string, downloadableRelease DownloadableRelease, projectConfig config.Project) error {
+	tempFolder := finalPath+ksuid.New().String()+separator
+	_ = os.Mkdir(tempFolder, 0700)
+	_, err := unzip(finalPath+downloadableRelease.Release.FileName,tempFolder)
+	if err != nil {
+		return err
+	}
+	err = filepath.Walk(tempFolder,
+		func(path string, info os.FileInfo, err error) error {
+			if !info.IsDir() {
+				excluded := false
+				for _, excludeSchema := range projectConfig.ExcludeFiles {
+					res, _ := regexp.MatchString(excludeSchema, info.Name())
+					if res {
+						excluded = true
+						break
+					}
+				}
+				if !excluded {
+					var addedPath = ""
+					if val, ok := projectConfig.InstallPaths[filepath.Ext(info.Name())]; ok {
+						addedPath = strings.ReplaceAll(strings.ReplaceAll(val,"./",""),"/",separator)
+					} else {
+						addedPath = strings.ReplaceAll(strings.ReplaceAll(projectConfig.InstallPaths["default"],"./",""),"/",separator)
+					}
+					err = os.Rename(path, basePath+addedPath+info.Name())
+				}
+			}
+			return nil
+		})
+	err = os.Remove(finalPath+downloadableRelease.Release.FileName)
+	err = os.RemoveAll(tempFolder)
+	return err
 }
 
 func unzip(src string, dest string) ([]string, error) {
