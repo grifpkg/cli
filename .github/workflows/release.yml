@@ -20,7 +20,6 @@ jobs:
       - name: "post-setup go"
         run: |
           go version
-          go clean -modcache
       - name: "build"
         run: |
           make all
