@@ -1,9 +1,9 @@
 name: "release"
 
 on:
-  commit:
-    branches:
-      - "master"
+  push:
+    branches: 
+      - main
 
 jobs:
   pre-release:
