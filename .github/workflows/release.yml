@@ -11,8 +11,9 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - name: "build"
+      - name: "checkout repo"
         uses: "actions/checkout@v2"
+      - name: "build"
         run: |
           make all
       - name: "release"
