@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/grifpkg/cli/client"
-	"github.com/grifpkg/cli/config"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/grifpkg/cli/client"
+	"github.com/grifpkg/cli/config"
+	"github.com/grifpkg/cli/installer"
 	"github.com/spf13/cobra"
 	"os"
 	"strconv"
@@ -17,7 +18,7 @@ var rootCMD = &cobra.Command{
 	Short: "grif is a plugin management system for bukkit-based projects",
 	Long: "grif is a plugin management system for bukkit-based projects that allows you to install, remove and update packages existing on spigotmc, the grif library, and various other configurable sources",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintf(color.Output, "%s grif-cli version %s\n", color.HiGreenString("i"), color.CyanString("1.0.0"))
+		fmt.Fprintf(color.Output, "%s grif-cli version %s\n", color.HiGreenString("i"), color.CyanString("1.0.2"))
 	},
 }
 
@@ -124,6 +125,15 @@ var excludeCMD = &cobra.Command{
 		fmt.Fprintf(color.Output, "%s added %s names/regex to the file-exclude list\n", color.HiGreenString("i"), color.CyanString(strconv.Itoa(added)))
 	},
 }
+var upgradeCMD = &cobra.Command{
+	Use:   "upgrade",
+	Aliases: []string{"up"},
+	Short: "Upgrades grif's binary files and creates a proper globally executable installation",
+	Long: "Upgrades grif's binary files with the github repo and creates a proper globally executable installation",
+	Run: func(cmd *cobra.Command, args []string) {
+		installer.Install()
+	},
+}
 
 func main(){
 	if err := rootCMD.Execute(); err != nil {
@@ -133,6 +143,7 @@ func main(){
 }
 
 func init() {
+	rootCMD.AddCommand(upgradeCMD)
 	rootCMD.AddCommand(initCMD)
 	rootCMD.AddCommand(installCMD)
 	rootCMD.AddCommand(excludeCMD)
