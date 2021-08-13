@@ -1,24 +1,54 @@
-//+build linux
-//+build freebsd
-//+build darwin
-
 package installer
 
 import (
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/grifpkg/cli/globals"
 	"github.com/kardianos/osext"
+	"github.com/segmentio/ksuid"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
-	"strings"
+	"os/user"
+	"path"
 )
 
-func Install(){
-	path, _ := osext.ExecutableFolder()
-	file, _ := osext.Executable()
-	fmt.Println(path+file)
-	if(!strings.HasPrefix(file, "/usr/local/grifpkg/bin/")){
-		_ := os.MkdirAll("/usr/local/grifpkg/bin/", 0700)
-		_ := os.Rename(path+file,"/usr/local/grifpkg/bin/grif")
+func isRoot() (bool, error) {
+	currentUser, err := user.Current()
+	if err != nil {
+		return false, err
 	}
-	exec.Command("export","PATH=/usr/local/grifpkg/bin/:$PATH")
+	return currentUser.Username == "root", nil
+}
+
+func Install(){
+	root, _:= isRoot()
+	if !root {
+		fmt.Fprintf(color.Output, "%s %s\n", color.HiYellowString("!"), color.RedString("You must execute this command as root in order to be able to copy the binary to /usr/local/grifpkg/bin"))
+		return
+	}
+	file, _ := osext.Executable()
+	randomId := ksuid.New().String()
+	installPath := "/usr/local/etc/grifpkg/bin/"
+	_ = copyBinary(file, installPath+randomId+"/")
+
+	// remove all folders except new installation and current installation
+	files, err := ioutil.ReadDir(installPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if f.Name()!="." && path.Base(f.Name()) != path.Base(file) && path.Base(f.Name()) != randomId {
+			_ = os.RemoveAll(installPath+f.Name())
+		}
+	}
+
+	// symlink
+	_ = os.Remove("/usr/local/bin/grif")
+	exec.Command("ln", "-s", installPath+randomId+"/grif", "/usr/local/bin/grif").Run()
+	exec.Command("chmod", "+x", "/usr/local/bin/grif").Run()
+
+	//
+	fmt.Fprintf(color.Output, "%s grif %s has been installed\n", color.HiGreenString("i"), color.CyanString(globals.Version))
 }

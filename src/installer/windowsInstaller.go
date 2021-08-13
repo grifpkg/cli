@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/kardianos/osext"
 	"github.com/segmentio/ksuid"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -26,7 +25,6 @@ func Install(){
 		fmt.Println(copyerr.Error())
 	}
 	// remove all folders except new installation and current installation
-
 	files, err := ioutil.ReadDir(installPath)
 	if err != nil {
 		log.Fatal(err)
@@ -40,28 +38,7 @@ func Install(){
 	createInstallScript(installPath, randomId)
 
 	exec.Command(installPath+"install.bat").Run()
-}
-
-func copyBinary(src string, dst string) error{
-	err := os.MkdirAll(dst, 0777)
-	if err!= nil && err != os.ErrExist {
-		return err
-	}
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	out, err := os.Create(dst+"grif.exe")
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	return err
+	fmt.Fprintf(color.Output, "%s grif %s has been installed\n", color.HiGreenString("i"), color.CyanString(globals.Version))
 }
 
 func createInstallScript(installPath string, id string){
