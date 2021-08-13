@@ -22,7 +22,7 @@ func isRoot() (bool, error) {
 	return currentUser.Username == "root", nil
 }
 
-func Install(){
+func InstallUnix(){
 	root, _:= isRoot()
 	if !root {
 		fmt.Fprintf(color.Output, "%s %s\n", color.HiYellowString("!"), color.RedString("You must execute this command as root in order to be able to copy the binary to /usr/local/grifpkg/bin"))

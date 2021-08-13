@@ -1,5 +1,3 @@
-//+build windows
-
 package installer
 
 import (
@@ -15,7 +13,7 @@ import (
 	"path"
 )
 
-func Install(){
+func InstallWindows(){
 	// run as admin
 	// dest
 	file, _ := osext.Executable()

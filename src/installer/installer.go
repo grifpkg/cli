@@ -6,6 +6,14 @@ import (
 	"runtime"
 )
 
+func Install() {
+	if runtime.GOOS == "windows" {
+		InstallWindows()
+	} else {
+		InstallUnix()
+	}
+}
+
 func copyBinary(src string, dst string) error{
 	err := os.MkdirAll(dst, 0777)
 	if err!= nil && err != os.ErrExist {
