@@ -4,6 +4,8 @@ package installer
 
 import (
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/grifpkg/cli/globals"
 	"github.com/kardianos/osext"
 	"github.com/segmentio/ksuid"
 	"io/ioutil"
