@@ -150,6 +150,7 @@ func main(){
 			return event
 		},
 	})
+	
 	defer sentry.Flush(time.Second * 2)
 	defer sentry.Recover()
 	if err := rootCMD.Execute(); err != nil {
