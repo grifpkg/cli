@@ -3,7 +3,6 @@ package installer
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/grifpkg/cli/globals"
 	"github.com/kardianos/osext"
 	"github.com/segmentio/ksuid"
 	"io/ioutil"
@@ -53,5 +52,5 @@ func InstallUnix(){
 	exec.Command("chmod", "+x", "/usr/local/bin/grif").Run()
 
 	// install notice
-	fmt.Fprintf(color.Output, "%s grif %s has been installed\n", color.HiGreenString("i"), color.CyanString(globals.Version))
+	fmt.Fprintf(color.Output, "%s grif has been installed\n", color.HiGreenString("i"))
 }
