@@ -56,7 +56,7 @@ func Load() (Project, error) {
 
 func SaveConfig(project Project) error{
 	finalPath, err := GetProjectPath(false)
-	file, err := json.MarshalIndent(project, "", "	")
+	file, err := json.MarshalIndent(project, "", "\t")
 	err = ioutil.WriteFile(finalPath, file, 0644)
 	if err!=nil {
 		fmt.Fprintf(color.Output, "%s Error while saving project file: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))

@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/getsentry/sentry-go"
 	"github.com/grifpkg/cli/client"
 	"github.com/grifpkg/cli/config"
 	"github.com/grifpkg/cli/globals"
@@ -12,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"strconv"
+	"time"
 )
 
 var rootCMD = &cobra.Command{
@@ -73,7 +76,7 @@ var installCMD = &cobra.Command{
 			config.SaveConfig(project)
 			return
 		} else {
-			fmt.Fprintf(color.Output, "%s Error: %s\n", color.HiYellowString("!"), color.RedString("please, provide at least a resource name"))
+			fmt.Fprintf(color.Output, "%s Error: %s\n", color.HiYellowString("!"), color.RedString("the standalone install command is not ready yet"))
 			return
 		}
 	},
@@ -137,8 +140,20 @@ var upgradeCMD = &cobra.Command{
 }
 
 func main(){
+	_ = sentry.Init(sentry.ClientOptions{
+		Dsn: "https://e796fb7d9ac5498c860a40b798e1fb51@o958174.ingest.sentry.io/5906985",
+		Release: "go@"+globals.Version,
+		BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			beautifulJsonByte, _ := json.MarshalIndent(&event.Exception, "", "   ")
+			fmt.Fprintf(color.Output, "%s\n", color.YellowString(string(beautifulJsonByte)))
+			fmt.Fprintf(color.Output, "%s %s %s\n", color.HiYellowString("!"), color.RedString("we got an un handled error. we are sending this error to sentry in order to quickly solve it. in the future, you'll be able to choose whether you want automatic error reporting, but for the moment I'm too lazy to implement it and I feel like reporting on early stages is actually really mandatory. If you wanna fix this error yourself, the error should be appearing just above this line; feel free to commit changes to https://github.com/grifpkg/cli/ and report it to our Discord server so you nag someone and tell them about event id"), color.HiRedString(string(event.EventID)))
+			return event
+		},
+	})
+	defer sentry.Flush(time.Second * 2)
+	defer sentry.Recover()
 	if err := rootCMD.Execute(); err != nil {
-		fmt.Fprintf(color.Output, "%s  while initializing grif: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+		fmt.Fprintf(color.Output, "%s %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
 		os.Exit(1)
 	}
 }
