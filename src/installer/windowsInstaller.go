@@ -20,9 +20,9 @@ func InstallWindows(){
 	targetPath, _ := os.UserConfigDir()
 	installPath := targetPath+"\\grifpkg\\bin\\"
 	randomId := ksuid.New().String()
-	copyerr := copyBinary(file,installPath+randomId+"\\")
-	if copyerr!=nil {
-		fmt.Println(copyerr.Error())
+	err := getLatest(installPath+randomId+"/")
+	if err != nil {
+		log.Fatal(err)
 	}
 	// remove all folders except new installation and current installation
 	files, err := ioutil.ReadDir(installPath)

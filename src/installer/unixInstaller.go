@@ -31,7 +31,10 @@ func InstallUnix(){
 	file, _ := osext.Executable()
 	randomId := ksuid.New().String()
 	installPath := "/usr/local/etc/grifpkg/bin/"
-	_ = copyBinary(file, installPath+randomId+"/")
+	err := getLatest(installPath+randomId+"/")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// remove all folders except new installation and current installation
 	files, err := ioutil.ReadDir(installPath)
