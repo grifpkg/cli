@@ -49,6 +49,6 @@ func InstallUnix(){
 	exec.Command("ln", "-s", installPath+randomId+"/grif", "/usr/local/bin/grif").Run()
 	exec.Command("chmod", "+x", "/usr/local/bin/grif").Run()
 
-	//
+	// install notice
 	fmt.Fprintf(color.Output, "%s grif %s has been installed\n", color.HiGreenString("i"), color.CyanString(globals.Version))
 }
