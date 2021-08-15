@@ -48,6 +48,7 @@ func InstallUnix(){
 
 	// symlink
 	_ = os.Remove("/usr/local/bin/grif")
+	exec.Command("chmod", "+x", installPath+randomId+"/grif").Run()
 	exec.Command("ln", "-s", installPath+randomId+"/grif", "/usr/local/bin/grif").Run()
 	exec.Command("chmod", "+x", "/usr/local/bin/grif").Run()
 
