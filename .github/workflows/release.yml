@@ -2,8 +2,8 @@ name: "release"
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - "master"
 
 jobs:
   pre-release:
@@ -28,5 +28,8 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
+          draft: true,
+          automatic_release_tag: "latest",
+          title: "work in progress"
           files: |
             ./target/*
