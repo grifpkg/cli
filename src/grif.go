@@ -47,6 +47,24 @@ var importCMD = &cobra.Command{
 	},
 }
 
+var updateCMD = &cobra.Command{
+	Use:   "update",
+	Aliases: []string{"u"},
+	Short: "updates resource releases to the last version",
+	Long: "updates the project dependencies to match the last available version and installs them",
+	Run: func(cmd *cobra.Command, args []string) {
+		project, err :=config.Load()
+		if err!=nil {
+			fmt.Fprintf(color.Output, "%s Error while loading project file: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+			return
+		}
+		fmt.Fprintf(color.Output, "%s Updating resources\n", color.HiGreenString("i"))
+		updated, skipped, upToDate := client.UpdateReleases(project)
+		fmt.Fprintf(color.Output, "%s Updated %s resource(s), %s error(s), %s resource(s) were already up-to-date\n", color.HiGreenString("i"), color.CyanString(strconv.Itoa(updated)), color.CyanString(strconv.Itoa(skipped)), color.CyanString(strconv.Itoa(upToDate)))
+		return
+	},
+}
+
 var installCMD = &cobra.Command{
 	Use:   "install",
 	Aliases: []string{"i"},
@@ -188,6 +206,7 @@ func init() {
 	rootCMD.AddCommand(initCMD)
 	rootCMD.AddCommand(upgradeCMD)
 	rootCMD.AddCommand(installCMD)
+	rootCMD.AddCommand(updateCMD)
 	rootCMD.AddCommand(importCMD)
 	rootCMD.AddCommand(excludeCMD)
 }

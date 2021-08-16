@@ -3,9 +3,12 @@ package client
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/grifpkg/cli/config"
 	"github.com/segmentio/ksuid"
 	"io"
@@ -15,6 +18,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 func GetResources(name string, author string, service int) ([]Resource, error) {
@@ -97,6 +101,51 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 	}
 
 	return downloadableRelease, err
+}
+
+func UpdateReleases(project config.Project) (updated int, skipped int, upToDate int){
+	updated = 0
+	skipped = 0
+	upToDate = 0
+	// (^) indicates this resource is expecting new releases
+	for identifier, resource := range project.Dependencies {
+		actualCurrentVersion := resource.Version
+		if strings.HasPrefix(resource.Version,"^") {
+			_, i := utf8.DecodeRuneInString(resource.Version)
+			actualCurrentVersion = resource.Version[i:]
+
+			latestRelease, err := getRelease(Resource{Id: resource.Resource}, "")
+			if err==nil {
+				if latestRelease.Version!=actualCurrentVersion {
+					versionHash := md5.New()
+					versionHash.Write([]byte(latestRelease.Id+latestRelease.Version))
+
+					resourceHash := md5.New()
+					resourceHash.Write([]byte(identifier+resource.Resource))
+
+					fmt.Fprintf(color.Output, "%s Updating %s: %s → %s\n", color.HiGreenString("i"), color.CyanString(identifier), color.CyanString(latestRelease.Version), color.CyanString(actualCurrentVersion))
+					_, err := DownloadResource(Resource{Id: resource.Resource}, latestRelease.Version, project, latestRelease.Id)
+					if err != nil {
+						skipped++
+						fmt.Fprintf(color.Output, "%s Error while updating %s: %s\n", color.HiYellowString("!"), color.CyanString(identifier), color.RedString(err.Error()))
+					}
+					project.Dependencies[identifier] = config.DependencyIdentifier{Version: "^"+latestRelease.Version, Resource: resource.Resource, Release: latestRelease.Id, Hash: []string{hex.EncodeToString(resourceHash.Sum(nil)),hex.EncodeToString(versionHash.Sum(nil))}}
+					updated++
+				} else {
+					fmt.Fprintf(color.Output, "%s Updating %s: already up-to-date, %s\n", color.HiGreenString("i"), color.CyanString(identifier), color.CyanString(actualCurrentVersion))
+					upToDate++
+				}
+			} else {
+				skipped++
+				fmt.Fprintf(color.Output, "%s Error while updating %s: %s\n", color.HiYellowString("!"), color.CyanString(identifier), color.RedString(err.Error()))
+			}
+		} else {
+			fmt.Fprintf(color.Output, "%s Updating %s: staying on forced version %s\n", color.HiGreenString("i"), color.CyanString(identifier), color.CyanString(actualCurrentVersion))
+			upToDate++
+		}
+	}
+	config.SaveConfig(project)
+	return updated, skipped, upToDate
 }
 
 func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.Project) (string, string, string, error){
