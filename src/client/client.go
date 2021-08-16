@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/grifpkg/cli/config"
 	"github.com/segmentio/ksuid"
@@ -61,13 +62,22 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 
 	// gets release
 	release, err := getRelease(resource,version)
+	if err != nil {
+		return DownloadableRelease{}, err
+	}
 
 	// gets downloadable release
 	request, err := request("resource/release/download/", map[string]string{
 		"release": release.Id,
 	})
 	downloadableRelease := DownloadableRelease{}
+	if err != nil {
+		return DownloadableRelease{}, err
+	}
 	err = json.NewDecoder(request).Decode(&downloadableRelease)
+	if err != nil {
+		return DownloadableRelease{}, errors.New("invalid JSON response from the server")
+	}
 
 	// download
 	finalPath, separator, basepath, err := downloadFile(downloadableRelease,projectConfig)
@@ -84,6 +94,10 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 }
 
 func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.Project) (string, string, string, error){
+	if downloadableRelease.Url == "" {
+		return "", "", "", errors.New("this release is hosted externally. support for externally hosted releases is coming this week")
+	}
+
 	resp, err := http.Get(downloadableRelease.Url)
 	defer resp.Body.Close()
 
