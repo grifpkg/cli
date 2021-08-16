@@ -53,13 +53,13 @@ var installCMD = &cobra.Command{
 	Short: "installs a package",
 	Long: "installs a package and its dependencies, and creates a project file if it isn't present yet",
 	Run: func(cmd *cobra.Command, args []string) {
+		var err error = nil
+		project, err :=config.Load()
+		if err!=nil {
+			fmt.Fprintf(color.Output, "%s Error while loading project file: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+			return
+		}
 		if len(args)>0 {
-			var err error = nil
-			project, err :=config.Load()
-			if err!=nil {
-				fmt.Fprintf(color.Output, "%s Error while loading project file: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
-				return
-			}
 			dependency := config.ParseResourceString(args[0])
 			fmt.Fprintf(color.Output, "%s Querying resource %s\n", color.HiGreenString("i"), color.CyanString(dependency.Resource))
 			resources, err := client.GetResources(dependency.Resource, dependency.Author, 0)
@@ -71,7 +71,7 @@ var installCMD = &cobra.Command{
 				return
 			}
 			fmt.Fprintf(color.Output, "%s Downloading resource %s\n", color.HiGreenString("i"), color.CyanString(resources[0].Name))
-			release, err := client.DownloadResource(resources[0],"", project)
+			release, err := client.DownloadResource(resources[0],"", project, "")
 			if err!=nil {
 				fmt.Fprintf(color.Output, "%s Error while downloading %s: %s\n", color.HiYellowString("!"), color.CyanString(resources[0].Name), color.RedString(err.Error()))
 				return
@@ -89,7 +89,19 @@ var installCMD = &cobra.Command{
 			config.SaveConfig(project)
 			return
 		} else {
-			fmt.Fprintf(color.Output, "%s Error: %s\n", color.HiYellowString("!"), color.RedString("the standalone install command is not ready yet"))
+			var downloadCount = 0
+			var errorCount = 0
+			for resourceName, dependency := range project.Dependencies {
+				fmt.Fprintf(color.Output, "%s Downloading %s\n", color.HiGreenString("i"), color.CyanString(resourceName))
+				_, err := client.DownloadResource(client.Resource{Id: dependency.Resource},dependency.Version,project, dependency.Release)
+				if err != nil {
+					errorCount++
+					fmt.Fprintf(color.Output, "%s Error while downloading %s: %s\n", color.HiYellowString("!"), color.CyanString(resourceName), color.RedString(err.Error()))
+				} else {
+					downloadCount++
+				}
+			}
+			fmt.Fprintf(color.Output, "%s Downloaded %s resource(s), %s skipped\n", color.HiGreenString("i"), color.CyanString(strconv.Itoa(downloadCount)), color.CyanString(strconv.Itoa(errorCount)))
 			return
 		}
 	},

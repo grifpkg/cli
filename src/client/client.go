@@ -57,26 +57,29 @@ func GetReleases(resource Resource) ([]Release, error) {
 	return releaseList, err
 }
 
-func DownloadResource(resource Resource, version string, projectConfig config.Project) (DownloadableRelease, error) {
+func DownloadResource(resource Resource, version string, projectConfig config.Project, releaseId string) (DownloadableRelease, error) {
 	var err error = nil
 
 	// gets release
-	release, err := getRelease(resource,version)
-	if err != nil {
-		return DownloadableRelease{}, err
+	if releaseId == "" {
+		release, err := getRelease(resource,version)
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
+		releaseId=release.Id
 	}
 
 	// gets downloadable release
 	request, err := request("resource/release/download/", map[string]string{
-		"release": release.Id,
+		"release": releaseId,
 	})
-	downloadableRelease := DownloadableRelease{}
 	if err != nil {
 		return DownloadableRelease{}, err
 	}
+	downloadableRelease := DownloadableRelease{}
 	err = json.NewDecoder(request).Decode(&downloadableRelease)
 	if err != nil {
-		return DownloadableRelease{}, errors.New("invalid JSON response from the server")
+		return DownloadableRelease{}, err
 	}
 
 	// download
@@ -87,7 +90,10 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 
 	// unzip
 	if downloadableRelease.Release.FileExtension=="zip" {
-		handleZip(finalPath, separator, basepath,downloadableRelease,projectConfig)
+		err := handleZip(finalPath, separator, basepath, downloadableRelease, projectConfig)
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
 	}
 
 	return downloadableRelease, err
