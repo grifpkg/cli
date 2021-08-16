@@ -24,7 +24,7 @@ func isRoot() (bool, error) {
 func InstallUnix(){
 	root, _:= isRoot()
 	if !root {
-		fmt.Fprintf(color.Output, "%s %s\n", color.HiYellowString("!"), color.RedString("You must execute this command as root in order to be able to copy the binary to /usr/local/grifpkg/bin"))
+		fmt.Fprintf(color.Output, "%s %s\n", color.HiYellowString("!"), color.RedString("You must execute this command as root in order to be able to copy the binary to /usr/local/bin/grifpkg/"))
 		return
 	}
 	file, _ := osext.Executable()
@@ -48,9 +48,9 @@ func InstallUnix(){
 
 	// symlink
 	_ = os.Remove("/usr/local/bin/grif")
-	exec.Command("chmod", "+x", installPath+randomId+"/grif").Run()
+	os.Chmod(installPath+randomId+"/grif", 0755)
 	exec.Command("ln", "-s", installPath+randomId+"/grif", "/usr/local/bin/grif").Run()
-	exec.Command("chmod", "+x", "/usr/local/bin/grif").Run()
+	os.Chmod("/usr/local/bin/grif", 0755)
 
 	// install notice
 	fmt.Fprintf(color.Output, "%s grif has been installed\n", color.HiGreenString("i"))
