@@ -37,6 +37,16 @@ func fileExists (filepath string) bool {
 	return !fileInfo.IsDir()
 }
 
+var importCMD = &cobra.Command{
+	Use:   "import",
+	Aliases: []string{"im"},
+	Short: "recognizes the installed dependencies and adds them to the project",
+	Long: "import your previously installed dependencies into your project config",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Fprintf(color.Output, "%s Error: %s\n", color.HiYellowString("!"), color.RedString("the import command is not ready yet"))
+	},
+}
+
 var installCMD = &cobra.Command{
 	Use:   "install",
 	Aliases: []string{"i"},
@@ -53,7 +63,10 @@ var installCMD = &cobra.Command{
 			dependency := config.ParseResourceString(args[0])
 			fmt.Fprintf(color.Output, "%s Querying resource %s\n", color.HiGreenString("i"), color.CyanString(dependency.Resource))
 			resources, err := client.GetResources(dependency.Resource, dependency.Author, 0)
-			if len(resources)<=0 || err!=nil {
+			if err!=nil {
+				fmt.Fprintf(color.Output, "%s Error while querying resources: %s\n", color.HiYellowString("!"), color.RedString(err.Error()))
+				return
+			} else if len(resources)<=0 {
 				fmt.Fprintf(color.Output, "%s No resources were found\n", color.HiYellowString("!"))
 				return
 			}
@@ -160,8 +173,9 @@ func main(){
 }
 
 func init() {
-	rootCMD.AddCommand(upgradeCMD)
 	rootCMD.AddCommand(initCMD)
+	rootCMD.AddCommand(upgradeCMD)
 	rootCMD.AddCommand(installCMD)
+	rootCMD.AddCommand(importCMD)
 	rootCMD.AddCommand(excludeCMD)
 }
