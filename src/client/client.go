@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 	"github.com/grifpkg/cli/config"
 	"github.com/segmentio/ksuid"
@@ -63,27 +64,72 @@ func GetReleases(resource Resource) ([]Release, error) {
 
 func DownloadResource(resource Resource, version string, projectConfig config.Project, releaseId string) (DownloadableRelease, error) {
 	var err error = nil
+	var release = Release{}
 
 	// gets release
 	if releaseId == "" {
-		release, err := getRelease(resource,version)
+		release, err = getRelease(resource,version)
 		if err != nil {
 			return DownloadableRelease{}, err
 		}
 		releaseId=release.Id
 	}
 
-	// gets downloadable release
-	request, err := request("resource/release/download/", map[string]string{
-		"release": releaseId,
-	})
-	if err != nil {
-		return DownloadableRelease{}, err
-	}
-	downloadableRelease := DownloadableRelease{}
-	err = json.NewDecoder(request).Decode(&downloadableRelease)
-	if err != nil {
-		return DownloadableRelease{}, err
+	var downloadableRelease = DownloadableRelease{}
+	if release.HasSuggestions!=nil {
+		if release.HasSuggestions == true {
+			// gets suggestion list release
+			request, err := request("resource/release/suggestion/list/", map[string]string{
+				"release": releaseId,
+			})
+			suggestionList := make([]UrlSuggestion,0)
+			err = json.NewDecoder(request).Decode(&suggestionList)
+			if err != nil {
+				return DownloadableRelease{}, err
+			}
+			var optionList []string
+			for _, suggestion := range suggestionList {
+				optionList = append(optionList, suggestion.Id+"\t\t| " + suggestion.Url)
+			}
+			optionList = append(optionList, "suggest another URL\t| grifpkg.com")
+			optionList = append(optionList, "skip\t\t\t| cancel")
+			resultURL := ""
+			prompt := &survey.Select{
+				Message: "This resource is hosted externally, here is a list of suggested download URLs, note this URLs are NOT verified and may not point to the desired target:",
+				Options: optionList,
+			}
+			survey.AskOne(prompt, &resultURL)
+			if strings.HasPrefix(resultURL,"suggest another URL"){
+				return DownloadableRelease{}, errors.New("suggest a download URL here: https://grifpkg.com/suggest/"+resource.Id+"/")
+			} else if strings.HasPrefix(resultURL,"skip") {
+				return DownloadableRelease{}, errors.New("skipped release")
+			} else {
+				downloadableRelease.Url=strings.Split(resultURL,"| ")[1]
+				downloadableRelease.Release=release
+				downloadableRelease.Resource=resource
+				downloadableRelease.Release.FileExtension=".jar"
+				downloadableRelease.Release.FileName="primitiveExternalSupport.jar"
+			}
+		} else {
+			if err != nil {
+				return DownloadableRelease{}, errors.New("this release is hosted externally and no valid download URLs have been suggested, please, suggest a download URL for this release here: https://grifpkg.com/suggest/"+resource.Id+"/")
+			}
+		}
+	} else {
+
+		// gets downloadable release
+		request, err := request("resource/release/download/", map[string]string{
+			"release": releaseId,
+		})
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
+		downloadableRelease = DownloadableRelease{}
+		err = json.NewDecoder(request).Decode(&downloadableRelease)
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
+
 	}
 
 	// download
@@ -159,14 +205,14 @@ func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.
 	path, err := os.Getwd()
 	separator := string(os.PathSeparator)
 	var addedPath = ""
-	if val, ok := projectConfig.InstallPaths[downloadableRelease.Release.FileExtension]; ok {
+	if val, ok := projectConfig.InstallPaths[downloadableRelease.Release.FileExtension.(string)]; ok {
 		addedPath = strings.ReplaceAll(strings.ReplaceAll(val,"./",""),"/",separator)
 	} else {
 		addedPath = strings.ReplaceAll(strings.ReplaceAll(projectConfig.InstallPaths["default"],"./",""),"/",separator)
 	}
 	finalPath := path+separator+addedPath
 	_ = os.Mkdir(finalPath, 0700)
-	out, err := os.Create(finalPath+downloadableRelease.Release.FileName)
+	out, err := os.Create(finalPath+downloadableRelease.Release.FileName.(string))
 	defer out.Close()
 	_, err = io.Copy(out, resp.Body)
 	return finalPath, separator, path+separator, err
@@ -198,7 +244,7 @@ func request(path string, data map[string]string) (io.Reader,error) {
 func handleZip(finalPath string, separator string, basePath string, downloadableRelease DownloadableRelease, projectConfig config.Project) error {
 	tempFolder := finalPath+ksuid.New().String()+separator
 	_ = os.Mkdir(tempFolder, 0700)
-	_, err := unzip(finalPath+downloadableRelease.Release.FileName,tempFolder)
+	_, err := unzip(finalPath+downloadableRelease.Release.FileName.(string),tempFolder)
 	if err != nil {
 		return err
 	}
@@ -225,7 +271,7 @@ func handleZip(finalPath string, separator string, basePath string, downloadable
 			}
 			return nil
 		})
-	err = os.Remove(finalPath+downloadableRelease.Release.FileName)
+	err = os.Remove(finalPath+downloadableRelease.Release.FileName.(string))
 	err = os.RemoveAll(tempFolder)
 	return err
 }
