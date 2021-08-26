@@ -12,3 +12,10 @@ type UrlSuggestion struct {
 	Creation   	int         	`json:"creation"`
 	Uses       	int         	`json:"uses"`
 }
+
+func UseSuggestion(suggestion UrlSuggestion) error{
+	_, err := Request("resource/release/suggestion/use/", map[string]string{
+		"suggestion": suggestion.Id,
+	})
+	return err
+}

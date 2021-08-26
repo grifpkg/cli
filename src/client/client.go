@@ -32,7 +32,7 @@ func GetResources(name string, author string, service int) ([]Resource, error) {
 	if service>-1 {
 		data["service"]= string(rune(service))
 	}
-	request, err := request("resource/query/", data)
+	request, err := Request("resource/query/", data)
 	resourceList := make([]Resource,0)
 	err = json.NewDecoder(request).Decode(&resourceList)
 	return resourceList, err
@@ -45,7 +45,7 @@ func getRelease(resource Resource, version string) (Release, error) {
 	if version!="" {
 		data["version"] = version
 	}
-	request, err := request("resource/release/get/", data)
+	request, err := Request("resource/release/get/", data)
 	release := Release{}
 	err = json.NewDecoder(request).Decode(&release)
 	return release, err
@@ -53,7 +53,7 @@ func getRelease(resource Resource, version string) (Release, error) {
 
 func GetReleases(resource Resource) ([]Release, error) {
 	var err error = nil
-	request, err := request("resource/release/list/", map[string]string{
+	request, err := Request("resource/release/list/", map[string]string{
 		"resource":resource.Id,
 	})
 
@@ -79,7 +79,7 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 	if release.HasSuggestions!=nil {
 		if release.HasSuggestions == true {
 			// gets suggestion list release
-			request, err := request("resource/release/suggestion/list/", map[string]string{
+			request, err := Request("resource/release/suggestion/list/", map[string]string{
 				"release": releaseId,
 			})
 			suggestionList := make([]UrlSuggestion,0)
@@ -104,21 +104,34 @@ func DownloadResource(resource Resource, version string, projectConfig config.Pr
 			} else if strings.HasPrefix(resultURL,"skip") {
 				return DownloadableRelease{}, errors.New("skipped release")
 			} else {
-				downloadableRelease.Url=strings.Split(resultURL,"| ")[1]
-				downloadableRelease.Release=release
-				downloadableRelease.Resource=resource
-				downloadableRelease.Release.FileExtension=".jar"
-				downloadableRelease.Release.FileName="primitiveExternalSupport.jar"
+				resultSuggestionId := strings.TrimSpace(strings.Split(resultURL,"|")[0])
+				var selectedSuggestion = UrlSuggestion{}
+				var found = false
+				for _, suggestion := range suggestionList {
+					if suggestion.Id==resultSuggestionId {
+						selectedSuggestion=suggestion
+						found=true
+						break
+					}
+				}
+				if !found {
+					return DownloadableRelease{}, errors.New("selection mismatch")
+				}
+				// notify usage
+				err := UseSuggestion(selectedSuggestion)
+				if err != nil {
+					return DownloadableRelease{}, errors.New("couldn't register usage")
+				}
+
+				downloadableRelease = DownloadableReleaseFromSuggestion(selectedSuggestion,release,resource)
 			}
 		} else {
-			if err != nil {
-				return DownloadableRelease{}, errors.New("this release is hosted externally and no valid download URLs have been suggested, please, suggest a download URL for this release here: https://grifpkg.com/suggest/"+resource.Id+"/")
-			}
+			return DownloadableRelease{}, errors.New("this release is hosted externally and no valid download URLs have been suggested, please, suggest a download URL for this release here: https://grifpkg.com/suggest/"+resource.Id+"/")
 		}
 	} else {
 
 		// gets downloadable release
-		request, err := request("resource/release/download/", map[string]string{
+		request, err := Request("resource/release/download/", map[string]string{
 			"release": releaseId,
 		})
 		if err != nil {
@@ -196,7 +209,7 @@ func UpdateReleases(project config.Project) (updated int, skipped int, upToDate 
 
 func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.Project) (string, string, string, error){
 	if downloadableRelease.Url == "" {
-		return "", "", "", errors.New("this release is hosted externally. support for externally hosted releases is coming this week")
+		return "", "", "", errors.New("this release is hosted externally. support for externally hosted releases is here but it has to make it to all commands, you can run 'grif install <name>' instead of the standalone command to choose an URL")
 	}
 
 	resp, err := http.Get(downloadableRelease.Url)
@@ -218,7 +231,7 @@ func downloadFile(downloadableRelease DownloadableRelease, projectConfig config.
 	return finalPath, separator, path+separator, err
 }
 
-func request(path string, data map[string]string) (io.Reader,error) {
+func Request(path string, data map[string]string) (io.Reader,error) {
 	var result io.Reader = nil
 	var err error = nil
 	client := &http.Client{}
