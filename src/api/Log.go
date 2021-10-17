@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
@@ -24,16 +25,16 @@ const (
 
 var currentSpinner *spinner.Spinner = spinner.New(spinner.CharSets[40],0)
 
-func Ask(questions []*survey.Question, answers interface{}){
-	LogTool(Question, []Message{}, questions, answers)
+func Ask(questions []*survey.Question, answers interface{}) (err error){
+	return LogTool(Question, []Message{}, questions, answers)
 }
 
-func Log(level LogLevel, messages []Message){
-	LogTool(level, messages, nil, nil)
+func Log(level LogLevel, messages []Message) (err error){
+	return LogTool(level, messages, nil, nil)
 }
 
 func LogOne(level LogLevel, message string){
-	LogTool(level, []Message{
+	_ = LogTool(level, []Message{ // ignore error, logOne usually just logs info/warns, not user input
 		{
 			Value: message,
 			Color: nil,
@@ -41,7 +42,7 @@ func LogOne(level LogLevel, message string){
 	}, nil, nil)
 }
 
-func LogTool(level LogLevel, messages []Message, questions interface{}, answers interface{}) {
+func LogTool(level LogLevel, messages []Message, questions interface{}, answers interface{}) (err error) {
 	if level== Progress {
 		if currentSpinner.Delay==0 {
 			currentSpinner = spinner.New(spinner.CharSets[40], 50*time.Millisecond)
@@ -79,21 +80,10 @@ func LogTool(level LogLevel, messages []Message, questions interface{}, answers 
 				}))
 				if err != nil {
 					answers = nil
-					LogTool(Warn, []Message{
-						{
-							Value: "error while expecting user input: "+err.Error(),
-							Color: nil,
-						},
-					}, nil, nil)
-					return
+					return err
 				}
 			} else {
-				LogTool(Warn, []Message{
-					{
-						Value: "survey started but no questions/answers were provided",
-						Color: nil,
-					},
-				}, nil, nil)
+				return errors.New("no questions were provided")
 			}
 		} else {
 			prefix := " ¿ "
@@ -109,7 +99,7 @@ func LogTool(level LogLevel, messages []Message, questions interface{}, answers 
 				prefix = " ✓ "
 				c = color.New(color.FgHiGreen)
 			}
-			_, err := fmt.Fprintf(color.Output, " %s", c.SprintFunc()(prefix))
+			_, err = fmt.Fprintf(color.Output, " %s", c.SprintFunc()(prefix))
 			for _, message := range messages {
 				if message.Color==nil {
 					_, err = fmt.Fprintf(color.Output, " %s", message.Value)
@@ -118,9 +108,7 @@ func LogTool(level LogLevel, messages []Message, questions interface{}, answers 
 				}
 			}
 			fmt.Print("\n")
-			if err != nil {
-				return
-			}
 		}
 	}
+	return err
 }

@@ -23,7 +23,7 @@ type Resource struct {
 func QueryResources(name string, author interface{}, service interface{}) ([]Resource, error) {
 	api.LogOne(api.Progress, "querying resources")
 	var err error = nil
-	var data = make(map[string]string, 0)
+	var data = make(map[string]interface{}, 0)
 	data["name"]=name
 	if author!=nil {
 		data["author"]=author.(string)
@@ -39,7 +39,7 @@ func QueryResources(name string, author interface{}, service interface{}) ([]Res
 
 func (resource Resource) GetReleases() (releases []Release, err error){
 	api.LogOne(api.Progress, "getting releases")
-	request, err := api.Request("resource/release/list/", map[string]string{
+	request, err := api.Request("resource/release/list/", map[string]interface{}{
 		"resource":resource.Id,
 	}, nil)
 
@@ -53,7 +53,7 @@ func (resource Resource) GetReleases() (releases []Release, err error){
 
 func (resource Resource) GetRelease(version interface{}, id interface{}) (releases Release, err error){
 	api.LogOne(api.Progress, "getting release")
-	var data map[string]string = make(map[string]string)
+	var data map[string]interface{} = make(map[string]interface{})
 	data["resource"] = resource.Id
 	if version!=nil {
 		data["version"] = version.(string)

@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/grifpkg/cli/api"
 	"github.com/grifpkg/cli/elements/project"
+	"github.com/grifpkg/cli/elements/session"
 	"github.com/grifpkg/cli/installer"
 	"github.com/spf13/cobra"
 	"os"
@@ -17,6 +18,25 @@ var rootCMD = &cobra.Command{
 	Short: "check the installed version",
 	Run: func(cmd *cobra.Command, args []string) {
 		api.LogOne(api.Info,"grifpkg version "+api.Version+", upgrade your version with grif upgrade")
+	},
+}
+
+var linkCMD = &cobra.Command{
+	Use:   "link",
+	Aliases: []string{"li"},
+	Short: "links an external service to your grifpkg account",
+	Run: func(cmd *cobra.Command, args []string) {
+		session, err := session.Get()
+		if err != nil {
+			api.LogOne(api.Warn, err.Error())
+			return
+		}
+		err = session.Link()
+		if err != nil {
+			api.LogOne(api.Warn, err.Error())
+			return
+		}
+		api.LogOne(api.Success,"successfully linked account")
 	},
 }
 
@@ -140,4 +160,5 @@ func init() {
 	rootCMD.AddCommand(updateCMD)
 	rootCMD.AddCommand(importCMD)
 	rootCMD.AddCommand(excludeCMD)
+	rootCMD.AddCommand(linkCMD)
 }

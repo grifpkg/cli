@@ -96,7 +96,7 @@ func (project Project) InstallAll() (release []Release, err error) {
 }
 
 func (project Project) ParseInstallString(string string, version interface{}) (resourceName string, resourceAuthor interface{}, versionTag interface{}){
-	if version == nil ||  (version != nil && strings.HasPrefix(fmt.Sprintf("%v", version),"^")) {
+	if version == nil ||  strings.HasPrefix(fmt.Sprintf("%v", version),"^") {
 		versionTag=nil
 	} else {
 		versionTag=fmt.Sprintf("%v", version)
@@ -226,7 +226,7 @@ func createProjectFile(path string) (project Project, err error){
 		Software string
 	}{}
 
-	api.Ask([]*survey.Question{
+	err = api.Ask([]*survey.Question{
 		{
 			Name: "name",
 			Prompt: &survey.Input{
@@ -253,11 +253,14 @@ func createProjectFile(path string) (project Project, err error){
 			Name: "software",
 			Prompt: &survey.Select{
 				Message: "Which server software are you using (if you are using a fork, select the closest parent)",
-				Options: []string{"@spigotmc/spigot","@spigotmc/bungeecord","@papermc/paper","@papermc/waterfall"},
+				Options: []string{"@spigotmc/spigot", "@spigotmc/bungeecord", "@papermc/paper", "@papermc/waterfall"},
 				Default: "@minecraft/java",
 			},
 		},
-	},&answers)
+	}, &answers)
+	if err != nil {
+		return Project{}, err
+	}
 
 	project.Name=answers.Name
 	project.Software=answers.Software

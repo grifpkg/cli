@@ -52,7 +52,7 @@ func (release Release) GetResolvedDependencies() (dependencies map[string]Resour
 
 func (release Release) ListSuggestions() (suggestions []urlSuggestion.UrlSuggestion, err error){
 	api.LogOne(api.Progress, "querying url suggestions")
-	request, err := api.Request("resource/release/suggestion/list/", map[string]string{
+	request, err := api.Request("resource/release/suggestion/list/", map[string]interface{}{
 		"release": release.Id,
 	}, nil)
 	if err!=nil{
@@ -96,7 +96,7 @@ func (release Release) GetDownloadable(suggestionIdFallback interface{}) (downlo
 					Selection string
 				}{}
 
-				api.Ask([]*survey.Question{
+				err := api.Ask([]*survey.Question{
 					{
 						Name: "selection",
 						Prompt: &survey.Select{
@@ -105,6 +105,9 @@ func (release Release) GetDownloadable(suggestionIdFallback interface{}) (downlo
 						},
 					},
 				}, &answers)
+				if err != nil {
+					return DownloadableRelease{}, err
+				}
 
 				if strings.HasPrefix(answers.Selection,"suggest another URL"){
 					return DownloadableRelease{}, errors.New("suggest a download URL here: https://grifpkg.com/suggest/"+release.Parent.(Resource).Id)
@@ -146,11 +149,11 @@ func (release Release) GetDownloadable(suggestionIdFallback interface{}) (downlo
 
 		var request interface{} = nil
 		if release.Parent != nil && release.Parent.(Resource).Paid {
-			request, err = api.Request("resource/release/download/", map[string]string{
+			request, err = api.Request("resource/release/download/", map[string]interface{}{
 				"release": release.Id,
 			}, session.GetHash())
 		} else {
-			request, err = api.Request("resource/release/download/", map[string]string{
+			request, err = api.Request("resource/release/download/", map[string]interface{}{
 				"release": release.Id,
 			}, nil)
 		}

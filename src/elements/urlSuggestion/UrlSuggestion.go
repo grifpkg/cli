@@ -20,7 +20,7 @@ type UrlSuggestion struct {
 
 func (suggestion UrlSuggestion) Use() error{
 	api.LogOne(api.Progress, "registering url suggestion use")
-	_, err := api.Request("resource/release/suggestion/use/", map[string]string{
+	_, err := api.Request("resource/release/suggestion/use/", map[string]interface{}{
 		"suggestion": suggestion.Id,
 	}, nil)
 	return err

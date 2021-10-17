@@ -16,7 +16,7 @@ type LoginRequest struct {
 
 func Start() (loginRequest LoginRequest, err error){
 	api.LogOne(api.Progress,"starting login request")
-	request, err := api.Request("login/request/start/", map[string]string{}, nil)
+	request, err := api.Request("login/request/start/", make(map[string]interface{},0), nil)
 	loginRequest = LoginRequest{}
 	err = json.NewDecoder(request).Decode(&loginRequest)
 	return loginRequest, err
@@ -24,7 +24,7 @@ func Start() (loginRequest LoginRequest, err error){
 
 func (loginRequest *LoginRequest) Get() (err error){
 	api.LogOne(api.Progress,"updating login request")
-	request, err := api.Request("login/request/get/", map[string]string{
+	request, err := api.Request("login/request/get/", map[string]interface{}{
 		"request": loginRequest.Hash,
 	}, nil)
 	err = json.NewDecoder(request).Decode(&loginRequest)
@@ -33,7 +33,7 @@ func (loginRequest *LoginRequest) Get() (err error){
 
 func (loginRequest *LoginRequest) Validate(githubToken string) (err error){
 	api.LogOne(api.Progress,"validating login request")
-	request, err := api.Request("login/request/validate/", map[string]string{
+	request, err := api.Request("login/request/validate/", map[string]interface{}{
 		"request": loginRequest.Hash,
 		"token": githubToken,
 	}, nil)
