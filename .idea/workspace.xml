@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5849f9c3-6ea4-420c-822c-d2a08705a5b1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/elements/deployment/Helper.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/grif-cli.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/remote-targets.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/API.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/API.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/elements/project/Project.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/Project.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/grif.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/grif.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/installer/Windows.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/installer/Windows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/installer/Unix.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/installer/Unix.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +47,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="goland.project.structure" />
   </component>
-  <component name="RunManager" selected="Go Build.windows">
+  <component name="RunManager" selected="Makefile Target.linux">
     <configuration name="windows" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="cli" />
       <working_directory value="$PROJECT_DIR$/target" />
@@ -72,9 +64,16 @@
       </makefile>
       <method v="2" />
     </configuration>
+    <configuration name="linux" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
+      <makefile filename="C:\Users\quiqu\Documents\GitHub\grifpkg\cli\makefile" target="" workingDirectory="C:\Users\quiqu\Documents\GitHub\grifpkg\cli" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Go Build.windows" />
       <item itemvalue="Makefile Target.build" />
+      <item itemvalue="Makefile Target.linux" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

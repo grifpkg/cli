@@ -2,9 +2,9 @@ package installer
 
 import (
 	"errors"
+	"github.com/grifpkg/cli/api"
 	"github.com/kardianos/osext"
 	"github.com/segmentio/ksuid"
-	"github.com/grifpkg/cli/api"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -32,7 +32,7 @@ func InstallUnix() (release grifRelease, err error){
 		return grifRelease{}, err
 	}
 	randomId := ksuid.New().String()
-	installPath := "/usr/local/etc/grifpkg/bin/"
+	installPath := "/opt/grifpkg/bin/"
 	api.LogOne(api.Progress,"downloading latest")
 	release, err = getLatest(installPath + randomId + "/")
 	if err!=nil {
@@ -52,7 +52,10 @@ func InstallUnix() (release grifRelease, err error){
 	}
 
 	// symlink
-	err = os.Remove("/usr/local/bin/grif")
+	rmErr := os.Remove("/usr/local/bin/grif")
+	if !os.IsNotExist(rmErr){
+		err = rmErr
+	}
 	if err!=nil {
 		return grifRelease{}, err
 	}
