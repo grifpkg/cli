@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 )
 
 func InstallWindows() (release grifRelease, err error){
@@ -17,7 +18,7 @@ func InstallWindows() (release grifRelease, err error){
 	api.LogOne(api.Progress,"getting config dir")
 	targetPath, _ := os.UserConfigDir()
 	installPath := targetPath+"\\grifpkg\\bin\\"
-	randomId := ksuid.New().String()
+	randomId := ksuid.New().String()[0:3]
 	api.LogOne(api.Progress,"downloading latest release")
 	release, err = getLatest(installPath+randomId+"/")
 	if err != nil {
@@ -35,24 +36,36 @@ func InstallWindows() (release grifRelease, err error){
 		}
 	}
 
-	api.LogOne(api.Progress,"creating install script")
-	createInstallScript(installPath, randomId)
-
-	api.LogOne(api.Progress,"running install script")
-	err = exec.Command(installPath+"install.bat").Run()
+	api.LogOne(api.Progress,"creating path script")
+	err = createInstallScript(installPath,randomId)
 	if err != nil {
 		return grifRelease{}, err
 	}
+
+	api.LogOne(api.Progress,"running path script")
+	err = exec.Command(installPath+"install.bat").Run()
+
 	return release, nil
 }
 
-func createInstallScript(installPath string, id string){
+func createInstallScript(installPath string, id string)(err error){
 	installScript, err := os.Create(installPath+"install.bat")
 	if os.IsExist(err) {
 		err = os.Remove(installPath+"install.bat")
-	} else {
-		// error
 	}
-	_, err = installScript.WriteString("setx path \""+installPath+id+"\\;%PATH%\"")
+
+	// path value gen
+	envPath := os.Getenv("PATH")
+	programs := strings.Split(envPath,";")
+	finalPrograms := installPath+id+";"
+	for _, program := range programs {
+		if !strings.HasSuffix(program,installPath) {
+			finalPrograms+=strings.TrimSuffix(program,";")+";"
+		}
+	}
+
+	// path value set
+	_, err = installScript.WriteString("setx path \""+finalPrograms+"\"")
 	defer installScript.Close()
+	return nil
 }

@@ -40,6 +40,25 @@ var linkCMD = &cobra.Command{
 	},
 }
 
+var deployCMD = &cobra.Command{
+	Use:   "deploy",
+	Aliases: []string{"dep"},
+	Short: "deploys the server using local resources (directly or via Docker) or using an external cloud service such as AWS, GCloud or purecore hosting",
+	Run: func(cmd *cobra.Command, args []string) {
+		project, _, err := project.GetProject()
+		if err != nil {
+			api.LogOne(api.Warn, err.Error())
+			return
+		}
+		err = project.Deploy()
+		if err != nil {
+			api.LogOne(api.Warn, err.Error())
+			return
+		}
+		api.LogOne(api.Success, "deployed")
+	},
+}
+
 var importCMD = &cobra.Command{
 	Use:   "import",
 	Aliases: []string{"im"},
@@ -161,4 +180,5 @@ func init() {
 	rootCMD.AddCommand(importCMD)
 	rootCMD.AddCommand(excludeCMD)
 	rootCMD.AddCommand(linkCMD)
+	rootCMD.AddCommand(deployCMD)
 }

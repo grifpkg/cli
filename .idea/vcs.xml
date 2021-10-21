@@ -2,5 +2,27 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/agext/levenshtein" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/apparentlymart/go-textseg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/cpuguy83/go-md2man" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/fsnotify/fsnotify" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/grifpkg/cli" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/hashicorp/hcl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/inconshreveable/mousetrap" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/magiconair/properties" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/mitchellh/go-wordwrap" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/mitchellh/mapstructure" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/pelletier/go-toml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/afero" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/cast" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/cobra" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/jwalterweatherman" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/pflag" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/spf13/viper" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/subosito/gotenv" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/github.com/zclconf/go-cty" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/golang.org/x/text" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/gopkg.in/ini.v1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/src/gopkg.in/yaml.v2" vcs="Git" />
   </component>
 </project>

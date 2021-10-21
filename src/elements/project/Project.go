@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/grifpkg/cli/api"
+	"github.com/grifpkg/cli/elements/deployment"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -33,6 +34,18 @@ func GetProject() (project *Project, lock *ProjectLock, err error){
 		loadedProjectLock=true
 	}
 	return &openedProject, &openedProjectLock, nil
+}
+
+func (project Project) Deploy() (err error){
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	err = deployment.DirectDeploy(project.Software, project.Version, wd, map[string]interface{}{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (project Project) InstallAll() (release []Release, err error) {
@@ -253,7 +266,7 @@ func createProjectFile(path string) (project Project, err error){
 			Name: "software",
 			Prompt: &survey.Select{
 				Message: "Which server software are you using (if you are using a fork, select the closest parent)",
-				Options: []string{"@spigotmc/spigot", "@spigotmc/bungeecord", "@papermc/paper", "@papermc/waterfall"},
+				Options: []string{"@spigotmc/spigot", "@spigotmc/bungeecord", "@papermc/paper", "@papermc/waterfall", "@minecraft/java-server"},
 				Default: "@minecraft/java",
 			},
 		},
