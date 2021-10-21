@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="5849f9c3-6ea4-420c-822c-d2a08705a5b1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/installer/Unix.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/installer/Unix.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/Globals.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/Globals.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +46,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="goland.project.structure" />
   </component>
-  <component name="RunManager" selected="Makefile Target.linux">
+  <component name="RunManager" selected="Makefile Target.build">
     <configuration name="windows" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="cli" />
       <working_directory value="$PROJECT_DIR$/target" />
@@ -59,7 +58,7 @@
       <method v="2" />
     </configuration>
     <configuration name="build" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
-      <makefile filename="C:\Users\quiqu\Documents\GitHub\grifpkg\cli\makefile" target="" workingDirectory="C:\Users\quiqu\Documents\GitHub\grifpkg\cli" arguments="">
+      <makefile filename="$PROJECT_DIR$/makefile" target="" workingDirectory="$PROJECT_DIR$" arguments="">
         <envs />
       </makefile>
       <method v="2" />
