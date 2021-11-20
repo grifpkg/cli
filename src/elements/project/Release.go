@@ -63,11 +63,31 @@ func (release Release) ListSuggestions() (suggestions []urlSuggestion.UrlSuggest
 	return suggestions, err
 }
 
+func (_ Release) Get(id string) (release Release, err error){
+	request, err := api.Request("resource/release/get/", map[string]interface{}{
+		"release": id,
+	}, nil)
+	if err != nil {
+		return Release{}, err
+	}
+	err = json.NewDecoder(request).Decode(&release)
+	if err != nil {
+		return Release{}, err
+	}
+	return release, nil
+}
+
 func (release Release) GetDownloadable(suggestionIdFallback interface{}) (downloadableRelease DownloadableRelease, err error) {
 	api.LogOne(api.Progress, "requesting downloadable release")
 	downloadableRelease = DownloadableRelease{}
+	if release.HasSuggestions==nil {
+		updatedRelease, err := release.Get(release.Id)
+		if err != nil {
+			return DownloadableRelease{}, err
+		}
+		release.HasSuggestions=updatedRelease.HasSuggestions
+	}
 	if release.HasSuggestions!=nil {
-
 		if release.HasSuggestions == true {
 			suggestionList, err := release.ListSuggestions()
 			if err!=nil {

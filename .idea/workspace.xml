@@ -7,6 +7,12 @@
     <list default="true" id="5849f9c3-6ea4-420c-822c-d2a08705a5b1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/Globals.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/Globals.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements/project/DownloadableRelease.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/DownloadableRelease.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements/project/Project.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/Project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements/project/ProjectLock.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/ProjectLock.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements/project/Release.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/Release.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/elements/project/Resource.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/elements/project/Resource.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/src/go.mod" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,12 +26,15 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/golang/sdk/go1.17" />
+  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.17.3" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="Make.Settings">
+    <option name="path" value="C:\ProgramData\chocolatey\bin\make.exe" />
   </component>
   <component name="ProjectId" id="1yBOAzwRr6t52NYWnWPiYEmmev8" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -43,18 +52,37 @@
     <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.vendoring.notification.had.been.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="goland.project.structure" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../../../ProgramData/chocolatey/bin/make.exe" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
-  <component name="RunManager" selected="Makefile Target.build">
+  <component name="RunManager" selected="Go Build.windows">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="cli" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="windows" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="cli" />
-      <working_directory value="$PROJECT_DIR$/target" />
+      <working_directory value="$PROJECT_DIR$/" />
       <go_parameters value="-o ./../target/grif_windows_x64.exe" />
       <kind value="DIRECTORY" />
       <directory value="$PROJECT_DIR$/src" />
       <filePath value="$PROJECT_DIR$" />
       <output_directory value="$PROJECT_DIR$/target/" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="cli" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="build" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
